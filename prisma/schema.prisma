@@ -1,0 +1,22 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Slot {
+  id              Int      @id @default(autoincrement())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  booked          Boolean  @default(false)
+  paid            Boolean  @default(false)
+  bookingDate     DateTime
+  name            String
+  email           String
+  phoneNumber     String
+  service         String
+  instagramHandle String
+}
