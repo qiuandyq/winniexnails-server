@@ -27,6 +27,9 @@ module.exports = {
     'semi': [
       'error',
       'always'
+    ],
+    'keyword-spacing': [
+      'error'
     ]
   }
 };
