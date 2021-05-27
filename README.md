@@ -4,4 +4,4 @@
 
 1. Install yarn
 2. Run `yarn`
-3. Run `yarn start`
+3. Run `yarn dev`
