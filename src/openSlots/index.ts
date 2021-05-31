@@ -10,16 +10,16 @@ router.get('/', async (req: Request, res: Response) => {
     res.json(await prisma.slot.findMany({
       where: {
         bookingDate: {
-          gte: dayjs().toDate()
+          gte: dayjs().toDate(),
         },
-        booked: false
+        booked: false,
       },
       orderBy: {
-        bookingDate: 'asc'
-      }
+        bookingDate: 'asc',
+      },
     }));
   } catch (e) {
-    res.status(500).json({error: e});
+    res.status(500).json({ error: e });
   }
 });
 

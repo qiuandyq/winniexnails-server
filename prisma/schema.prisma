@@ -20,4 +20,5 @@ model Slot {
   phoneNumber     String?
   service         String?
   instagramHandle String?
+  price           Decimal?
 }
