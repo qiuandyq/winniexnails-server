@@ -14,7 +14,10 @@ model Slot {
   updatedAt       DateTime @updatedAt
   booked          Boolean  @default(false)
   paid            Boolean  @default(false)
-  bookingDate     DateTime
+  paidEmail       Boolean  @default(false)
+  updateEmail     Boolean  @default(false)
+  confirmEmail    Boolean  @default(false)
+  bookingDate     String?
   name            String?
   email           String?
   phoneNumber     String?
