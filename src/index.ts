@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import slots from './slots';
 import openSlots from './openSlots';
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const app = express();
 
 app.use(cors());

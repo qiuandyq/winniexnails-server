@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 import { PrismaClient, Prisma } from '@prisma/client';
 import { Request, Response, Router } from 'express';
 import dayjs from 'dayjs';
@@ -148,7 +149,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
   }
 });
 
-router.post('/:id/book', async (req: Request, res: Response) => {
+router.post('/:id/bookingconfirm', async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
     const {
@@ -193,6 +194,190 @@ router.post('/:id/book', async (req: Request, res: Response) => {
         name: 'winniexnails',
       },
       templateId: 'd-ed9589eac5144b148c8196a3dd0ffd6a',
+      dynamic_template_data: {
+        name,
+        booking_date: dayjs(slot.bookingDate).format('LLL'),
+        service,
+        price: currency(price).format(),
+      },
+    };
+
+    await sgMail.send(emailBody);
+
+    return res.json(updatedSlot);
+  } catch (e) {
+    return res.status(500).json({ error: e });
+  }
+});
+
+router.post('/:id/bookingcancel', async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    const {
+      name,
+      email,
+      phoneNumber,
+      service,
+      instagramHandle,
+      price,
+    } = req.body;
+
+    if (!id) return res.status(400).json({ error: 'invalid id' });
+
+    if ([name, email, phoneNumber, service, instagramHandle, price].some((x) => !x)) {
+      return res.status(400).json({ error: 'invalid body' });
+    }
+
+    const slot = await prisma.slot.findUnique({
+      where: { id },
+    });
+    if (!slot) return res.status(404).json({ error: 'no slot found' });
+
+    if (slot.booked) return res.status(400).json({ error: 'slot already booked' });
+
+    const updatedSlot = await prisma.slot.update({
+      where: { id },
+      data: {
+        name,
+        email,
+        phoneNumber,
+        service,
+        instagramHandle,
+        price,
+        booked: true,
+      },
+    });
+
+    const emailBody = {
+      to: email,
+      from: {
+        email: 'hello@winniexnails.com',
+        name: 'winniexnails',
+      },
+      templateId: 'd-1393570b041c4dd7b81e667300f3eb2b',
+      dynamic_template_data: {
+        name,
+        booking_date: dayjs(slot.bookingDate).format('LLL'),
+        service,
+        price: currency(price).format(),
+      },
+    };
+
+    await sgMail.send(emailBody);
+
+    return res.json(updatedSlot);
+  } catch (e) {
+    return res.status(500).json({ error: e });
+  }
+});
+
+router.post('/:id/bookingpaid', async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    const {
+      name,
+      email,
+      phoneNumber,
+      service,
+      instagramHandle,
+      price,
+      paidemail,
+    } = req.body;
+
+    if (!id) return res.status(400).json({ error: 'invalid id' });
+
+    if ([name, email, phoneNumber, service, instagramHandle, price, paidemail].some((x) => !x)) {
+      return res.status(400).json({ error: 'invalid body' });
+    }
+
+    const slot = await prisma.slot.findUnique({
+      where: { id },
+    });
+    if (!slot) return res.status(404).json({ error: 'no slot found' });
+
+    if (slot.booked) return res.status(400).json({ error: 'slot already booked' });
+
+    const updatedSlot = await prisma.slot.update({
+      where: { id },
+      data: {
+        name,
+        email,
+        phoneNumber,
+        service,
+        instagramHandle,
+        price,
+        booked: true,
+      },
+    });
+
+    const emailBody = {
+      to: email,
+      from: {
+        email: 'hello@winniexnails.com',
+        name: 'winniexnails',
+      },
+      templateId: 'd-cc0665b4e33a44cf98eb37f727ab89be',
+      dynamic_template_data: {
+        name,
+        booking_date: dayjs(slot.bookingDate).format('LLL'),
+        service,
+        price: currency(price).format(),
+      },
+    };
+
+    await sgMail.send(emailBody);
+
+    return res.json(updatedSlot);
+  } catch (e) {
+    return res.status(500).json({ error: e });
+  }
+});
+
+router.post('/:id/booking48', async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    const {
+      name,
+      email,
+      phoneNumber,
+      service,
+      instagramHandle,
+      price,
+    } = req.body;
+
+    if (!id) return res.status(400).json({ error: 'invalid id' });
+
+    if ([name, email, phoneNumber, service, instagramHandle, price].some((x) => !x)) {
+      return res.status(400).json({ error: 'invalid body' });
+    }
+
+    const slot = await prisma.slot.findUnique({
+      where: { id },
+    });
+    if (!slot) return res.status(404).json({ error: 'no slot found' });
+
+    if (slot.booked) return res.status(400).json({ error: 'slot already booked' });
+
+    const updatedSlot = await prisma.slot.update({
+      where: { id },
+      data: {
+        name,
+        email,
+        phoneNumber,
+        service,
+        instagramHandle,
+        price,
+        booked: true,
+      },
+    });
+
+    const emailBody = {
+      to: email,
+      from: {
+        email: 'hello@winniexnails.com',
+        name: 'winniexnails',
+      },
+      templateId: 'd-c96b2a64d0934a16b0e39d45dcb9d085',
       dynamic_template_data: {
         name,
         booking_date: dayjs(slot.bookingDate).format('LLL'),
