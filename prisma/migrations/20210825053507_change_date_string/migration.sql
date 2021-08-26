@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Slot" ALTER COLUMN "bookingDate" DROP NOT NULL,
-ALTER COLUMN "bookingDate" SET DATA TYPE TEXT;
