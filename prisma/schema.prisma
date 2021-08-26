@@ -17,6 +17,7 @@ model Slot {
   paidEmail       Boolean  @default(false)
   updateEmail     Boolean  @default(false)
   confirmEmail    Boolean  @default(false)
+  bookingDate     DateTime
   name            String?
   email           String?
   phoneNumber     String?
