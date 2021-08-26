@@ -187,24 +187,26 @@ router.post('/:id/bookingconfirm', async (req: Request, res: Response) => {
       },
     });
 
-    const emailBody = {
-      to: email,
-      from: {
-        email: 'hello@winniexnails.com',
-        name: 'winniexnails',
-      },
-      templateId: 'd-ed9589eac5144b148c8196a3dd0ffd6a',
-      dynamic_template_data: {
-        name,
-        booking_date: dayjs(slot.bookingDate).format('LLL'),
-        service,
-        price: currency(price).format(),
-      },
-    };
+    if (slot.bookingDate) {
+      const emailBody = {
+        to: email,
+        from: {
+          email: 'hello@winniexnails.com',
+          name: 'winniexnails',
+        },
+        templateId: 'd-ed9589eac5144b148c8196a3dd0ffd6a',
+        dynamic_template_data: {
+          name,
+          booking_date: dayjs(slot.bookingDate).format('LLL'),
+          service,
+          price: currency(price).format(),
+        },
+      };
+      await sgMail.send(emailBody);
 
-    await sgMail.send(emailBody);
-
-    return res.json(updatedSlot);
+      return res.json(updatedSlot);
+    }
+    return res.status(500).json({ error: 'server error' });
   } catch (e) {
     return res.status(500).json({ error: e });
   }
@@ -248,24 +250,26 @@ router.post('/:id/bookingcancel', async (req: Request, res: Response) => {
       },
     });
 
-    const emailBody = {
-      to: email,
-      from: {
-        email: 'hello@winniexnails.com',
-        name: 'winniexnails',
-      },
-      templateId: 'd-1393570b041c4dd7b81e667300f3eb2b',
-      dynamic_template_data: {
-        name,
-        booking_date: dayjs(slot.bookingDate).format('LLL'),
-        service,
-        price: currency(price).format(),
-      },
-    };
+    if (slot.bookingDate) {
+      const emailBody = {
+        to: email,
+        from: {
+          email: 'hello@winniexnails.com',
+          name: 'winniexnails',
+        },
+        templateId: 'd-1393570b041c4dd7b81e667300f3eb2b',
+        dynamic_template_data: {
+          name,
+          booking_date: dayjs(slot.bookingDate).format('LLL'),
+          service,
+          price: currency(price).format(),
+        },
+      };
+      await sgMail.send(emailBody);
 
-    await sgMail.send(emailBody);
-
-    return res.json(updatedSlot);
+      return res.json(updatedSlot);
+    }
+    return res.status(500).json({ error: 'server error' });
   } catch (e) {
     return res.status(500).json({ error: e });
   }
@@ -310,24 +314,26 @@ router.post('/:id/bookingpaid', async (req: Request, res: Response) => {
       },
     });
 
-    const emailBody = {
-      to: email,
-      from: {
-        email: 'hello@winniexnails.com',
-        name: 'winniexnails',
-      },
-      templateId: 'd-cc0665b4e33a44cf98eb37f727ab89be',
-      dynamic_template_data: {
-        name,
-        booking_date: dayjs(slot.bookingDate).format('LLL'),
-        service,
-        price: currency(price).format(),
-      },
-    };
+    if (slot.bookingDate) {
+      const emailBody = {
+        to: email,
+        from: {
+          email: 'hello@winniexnails.com',
+          name: 'winniexnails',
+        },
+        templateId: 'd-cc0665b4e33a44cf98eb37f727ab89be',
+        dynamic_template_data: {
+          name,
+          booking_date: dayjs(slot.bookingDate).format('LLL'),
+          service,
+          price: currency(price).format(),
+        },
+      };
+      await sgMail.send(emailBody);
 
-    await sgMail.send(emailBody);
-
-    return res.json(updatedSlot);
+      return res.json(updatedSlot);
+    }
+    return res.status(500).json({ error: 'server error' });
   } catch (e) {
     return res.status(500).json({ error: e });
   }
@@ -371,24 +377,26 @@ router.post('/:id/booking48', async (req: Request, res: Response) => {
       },
     });
 
-    const emailBody = {
-      to: email,
-      from: {
-        email: 'hello@winniexnails.com',
-        name: 'winniexnails',
-      },
-      templateId: 'd-c96b2a64d0934a16b0e39d45dcb9d085',
-      dynamic_template_data: {
-        name,
-        booking_date: dayjs(slot.bookingDate).format('LLL'),
-        service,
-        price: currency(price).format(),
-      },
-    };
+    if (slot.bookingDate) {
+      const emailBody = {
+        to: email,
+        from: {
+          email: 'hello@winniexnails.com',
+          name: 'winniexnails',
+        },
+        templateId: 'd-c96b2a64d0934a16b0e39d45dcb9d085',
+        dynamic_template_data: {
+          name,
+          booking_date: dayjs(slot.bookingDate).format('LLL'),
+          service,
+          price: currency(price).format(),
+        },
+      };
+      await sgMail.send(emailBody);
 
-    await sgMail.send(emailBody);
-
-    return res.json(updatedSlot);
+      return res.json(updatedSlot);
+    }
+    return res.status(500).json({ error: 'server error' });
   } catch (e) {
     return res.status(500).json({ error: e });
   }
