@@ -10,6 +10,86 @@ import currency from 'currency.js';
 const router = Router();
 const prisma = new PrismaClient();
 
+const { CronJob } = require('cron');
+
+const job = new CronJob('0 */6 * * *', (async () => {
+  const begin = new Date(new Date().getTime());
+  const end = new Date(new Date().getTime());
+  end.setHours(end.getHours() + 48);
+
+  const findQuery: Prisma.SlotFindManyArgs = {
+    orderBy: {
+      bookingDate: 'asc',
+    },
+    where: {
+      bookingDate: {
+        gte: begin.toISOString(),
+        lt: end.toISOString(),
+      },
+      booked: true,
+      paid: true,
+      updateEmail: false,
+    },
+  };
+
+  const result = await prisma.slot.findMany(findQuery);
+
+  result.forEach(async (booking) => {
+    if (booking.bookingDate) {
+      const emailBody = {
+        to: String(booking.email),
+        from: {
+          email: 'hello@winniexnails.com',
+          name: 'winniexnails',
+        },
+        templateId: 'd-c96b2a64d0934a16b0e39d45dcb9d085',
+        dynamic_template_data: {
+          name: booking.name,
+          booking_date: dayjs(booking.bookingDate).format('LLL'),
+          service: booking.service,
+          price: currency(String(booking.price)).format(),
+        },
+      };
+      await sgMail.send(emailBody);
+    }
+    await prisma.slot.update({
+      where: {
+        id: booking.id,
+      },
+      data: {
+        updateEmail: true,
+      },
+    });
+  });
+
+  // const updatedSlot = await prisma.slot.update({
+  //   where: { id },
+  //   data: {
+  //     updateEmail: true,
+  //   },
+  // });
+
+  // if (slot.bookingDate) {
+  //   const emailBody = {
+  //     to: email,
+  //     from: {
+  //       email: 'hello@winniexnails.com',
+  //       name: 'winniexnails',
+  //     },
+  //     templateId: 'd-c96b2a64d0934a16b0e39d45dcb9d085',
+  //     dynamic_template_data: {
+  //       name,
+  //       booking_date: dayjs(slot.bookingDate).format('LLL'),
+  //       service,
+  //       price: currency(price).format(),
+  //     },
+  //   };
+  //   await sgMail.send(emailBody);
+
+  // console.log(await prisma.slot.findMany(findQuery));
+}), null, true, 'America/Los_Angeles');
+job.start();
+
 sgMail.setApiKey(String(process.env.SENDGRID_API_KEY));
 
 dayjs.extend(LocalizedFormat);
@@ -172,7 +252,7 @@ router.post('/:id/bookingconfirm', async (req: Request, res: Response) => {
     });
     if (!slot) return res.status(404).json({ error: 'no slot found' });
 
-    if (slot.booked) return res.status(400).json({ error: 'slot already booked' });
+    if (slot.confirmEmail) return res.status(400).json({ error: 'email already sent' });
 
     const updatedSlot = await prisma.slot.update({
       where: { id },
@@ -183,7 +263,7 @@ router.post('/:id/bookingconfirm', async (req: Request, res: Response) => {
         service,
         instagramHandle,
         price,
-        booked: true,
+        confirmEmail: true,
       },
     });
 
@@ -196,69 +276,7 @@ router.post('/:id/bookingconfirm', async (req: Request, res: Response) => {
         },
         templateId: 'd-ed9589eac5144b148c8196a3dd0ffd6a',
         dynamic_template_data: {
-          name,
-          booking_date: dayjs(slot.bookingDate).format('LLL'),
-          service,
-          price: currency(price).format(),
-        },
-      };
-      await sgMail.send(emailBody);
-
-      return res.json(updatedSlot);
-    }
-    return res.status(500).json({ error: 'server error' });
-  } catch (e) {
-    return res.status(500).json({ error: e });
-  }
-});
-
-router.post('/:id/bookingcancel', async (req: Request, res: Response) => {
-  try {
-    const id = Number(req.params.id);
-    const {
-      name,
-      email,
-      phoneNumber,
-      service,
-      instagramHandle,
-      price,
-    } = req.body;
-
-    if (!id) return res.status(400).json({ error: 'invalid id' });
-
-    if ([name, email, phoneNumber, service, instagramHandle, price].some((x) => !x)) {
-      return res.status(400).json({ error: 'invalid body' });
-    }
-
-    const slot = await prisma.slot.findUnique({
-      where: { id },
-    });
-    if (!slot) return res.status(404).json({ error: 'no slot found' });
-
-    if (slot.booked) return res.status(400).json({ error: 'slot already booked' });
-
-    const updatedSlot = await prisma.slot.update({
-      where: { id },
-      data: {
-        name,
-        email,
-        phoneNumber,
-        service,
-        instagramHandle,
-        price,
-        booked: true,
-      },
-    });
-
-    if (slot.bookingDate) {
-      const emailBody = {
-        to: email,
-        from: {
-          email: 'hello@winniexnails.com',
-          name: 'winniexnails',
-        },
-        templateId: 'd-1393570b041c4dd7b81e667300f3eb2b',
-        dynamic_template_data: {
+          id: slot.id,
           name,
           booking_date: dayjs(slot.bookingDate).format('LLL'),
           service,
@@ -285,70 +303,6 @@ router.post('/:id/bookingpaid', async (req: Request, res: Response) => {
       service,
       instagramHandle,
       price,
-      paidemail,
-    } = req.body;
-
-    if (!id) return res.status(400).json({ error: 'invalid id' });
-
-    if ([name, email, phoneNumber, service, instagramHandle, price, paidemail].some((x) => !x)) {
-      return res.status(400).json({ error: 'invalid body' });
-    }
-
-    const slot = await prisma.slot.findUnique({
-      where: { id },
-    });
-    if (!slot) return res.status(404).json({ error: 'no slot found' });
-
-    if (slot.booked) return res.status(400).json({ error: 'slot already booked' });
-
-    const updatedSlot = await prisma.slot.update({
-      where: { id },
-      data: {
-        name,
-        email,
-        phoneNumber,
-        service,
-        instagramHandle,
-        price,
-        booked: true,
-      },
-    });
-
-    if (slot.bookingDate) {
-      const emailBody = {
-        to: email,
-        from: {
-          email: 'hello@winniexnails.com',
-          name: 'winniexnails',
-        },
-        templateId: 'd-cc0665b4e33a44cf98eb37f727ab89be',
-        dynamic_template_data: {
-          name,
-          booking_date: dayjs(slot.bookingDate).format('LLL'),
-          service,
-          price: currency(price).format(),
-        },
-      };
-      await sgMail.send(emailBody);
-
-      return res.json(updatedSlot);
-    }
-    return res.status(500).json({ error: 'server error' });
-  } catch (e) {
-    return res.status(500).json({ error: e });
-  }
-});
-
-router.post('/:id/booking48', async (req: Request, res: Response) => {
-  try {
-    const id = Number(req.params.id);
-    const {
-      name,
-      email,
-      phoneNumber,
-      service,
-      instagramHandle,
-      price,
     } = req.body;
 
     if (!id) return res.status(400).json({ error: 'invalid id' });
@@ -362,7 +316,7 @@ router.post('/:id/booking48', async (req: Request, res: Response) => {
     });
     if (!slot) return res.status(404).json({ error: 'no slot found' });
 
-    if (slot.booked) return res.status(400).json({ error: 'slot already booked' });
+    if (slot.paidEmail) return res.status(400).json({ error: 'paid email already sent' });
 
     const updatedSlot = await prisma.slot.update({
       where: { id },
@@ -372,8 +326,7 @@ router.post('/:id/booking48', async (req: Request, res: Response) => {
         phoneNumber,
         service,
         instagramHandle,
-        price,
-        booked: true,
+        paidEmail: true,
       },
     });
 
@@ -384,7 +337,7 @@ router.post('/:id/booking48', async (req: Request, res: Response) => {
           email: 'hello@winniexnails.com',
           name: 'winniexnails',
         },
-        templateId: 'd-c96b2a64d0934a16b0e39d45dcb9d085',
+        templateId: 'd-cc0665b4e33a44cf98eb37f727ab89be',
         dynamic_template_data: {
           name,
           booking_date: dayjs(slot.bookingDate).format('LLL'),
