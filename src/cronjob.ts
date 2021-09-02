@@ -56,3 +56,5 @@ const cronJob = async () => {
     });
   });
 };
+
+cronJob();
