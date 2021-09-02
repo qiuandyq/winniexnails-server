@@ -10,6 +10,8 @@ import currency from 'currency.js';
 const router = Router();
 const prisma = new PrismaClient();
 
+sgMail.setApiKey(String(process.env.SENDGRID_API_KEY));
+
 const { CronJob } = require('cron');
 
 const job = new CronJob('0 */6 * * *', (async () => {
@@ -89,8 +91,6 @@ const job = new CronJob('0 */6 * * *', (async () => {
   // console.log(await prisma.slot.findMany(findQuery));
 }), null, true, 'America/Los_Angeles');
 job.start();
-
-sgMail.setApiKey(String(process.env.SENDGRID_API_KEY));
 
 dayjs.extend(LocalizedFormat);
 
