@@ -24,4 +24,13 @@ model Slot {
   service         String?
   instagramHandle String?
   price           Decimal?
+  addOn           SlotAddOn[]
+}
+
+model SlotAddOn {
+  id              Int      @id @default(autoincrement())
+  addon           String
+  price           Decimal
+  slot            Slot @relation(fields: [slotId], references: [id])
+  slotId          Int
 }
