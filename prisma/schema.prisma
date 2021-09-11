@@ -24,10 +24,10 @@ model Slot {
   service         String?
   instagramHandle String?
   price           Decimal?
-  addOn           SlotAddOn[]
+  addons          SlotAddon[]
 }
 
-model SlotAddOn {
+model SlotAddon {
   id              Int      @id @default(autoincrement())
   addon           String
   price           Decimal

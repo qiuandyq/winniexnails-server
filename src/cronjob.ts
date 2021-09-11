@@ -37,7 +37,7 @@ const cronJob = async () => {
       updateEmail: false,
     },
     include: {
-      addOn: true,
+      addons: true,
     },
   };
 
@@ -45,7 +45,7 @@ const cronJob = async () => {
 
   result.forEach(async (booking: any) => {
     if (booking.bookingDate) {
-      const newAddOn = booking.addOn.filter((slot: any) => slot.addon !== 'none');
+      const newAddOn = booking.addons.filter((addon: any) => addon.addon !== 'none');
       const bookingDate = `${new Date(booking.bookingDate).toDateString()
       } ${formatAMPM(new Date(booking.bookingDate))}`;
       const emailBody = {
