@@ -1,6 +1,5 @@
 /* eslint-disable linebreak-style */
 import { PrismaClient, Prisma } from '@prisma/client';
-import dayjs from 'dayjs';
 import sgMail from '@sendgrid/mail';
 import currency from 'currency.js';
 
@@ -37,14 +36,16 @@ const cronJob = async () => {
       paid: true,
       updateEmail: false,
     },
+    include: {
+      addons: true,
+    },
   };
 
   const result = await prisma.slot.findMany(findQuery);
 
-  console.log(result);
-
-  result.forEach(async (booking) => {
+  result.forEach(async (booking: any) => {
     if (booking.bookingDate) {
+      const newAddOn = booking.addons.filter((addon: any) => addon.addon !== 'none');
       const bookingDate = `${new Date(booking.bookingDate).toDateString()
       } ${formatAMPM(new Date(booking.bookingDate))}`;
       const emailBody = {
@@ -59,6 +60,7 @@ const cronJob = async () => {
           booking_date: bookingDate,
           service: booking.service,
           price: currency(String(booking.price)).format(),
+          newAddOn,
         },
       };
       await sgMail.send(emailBody);

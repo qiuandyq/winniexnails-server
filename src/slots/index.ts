@@ -100,6 +100,9 @@ router.get('/', async (req: Request, res: Response) => {
       orderBy: {
         bookingDate: 'asc',
       },
+      include: {
+        addons: true,
+      },
     };
 
     if (req.query.from) {
@@ -185,7 +188,23 @@ router.patch('/:id', async (req: Request, res: Response) => {
       service,
       instagramHandle,
       price,
+      addons,
     } = req.body;
+
+    if (paid) {
+      try {
+        const updatedSlot = await prisma.slot.update({
+          where: { id },
+          data: {
+            paid: true,
+          },
+        });
+
+        return res.json(updatedSlot);
+      } catch (e) {
+        return res.status(500).json({ error: e });
+      }
+    }
 
     if (!id) return res.status(400).json({ error: 'invalid id' });
 
@@ -204,10 +223,32 @@ router.patch('/:id', async (req: Request, res: Response) => {
     if (service !== undefined) data.service = service;
     if (instagramHandle !== undefined) data.instagramHandle = instagramHandle;
     if (price !== undefined) data.price = price;
+    if (addons !== undefined) data.addons = addons;
 
+    // if addon create slotaddon loop
+    const addonIds: { id: number; }[] = [];
+
+    if (addons.length > 0) {
+      addons.forEach(async (addon: any) => {
+        const createAddon = await prisma.slotAddon.create({
+          data: {
+            slotId: id,
+            addon: addon.addon,
+            price: addon.price,
+          },
+        });
+
+        addonIds.push({ id: createAddon.id });
+      });
+    }
     const updatedSlot = await prisma.slot.update({
       where: { id },
-      data,
+      data: {
+        booked: true,
+        addons: {
+          connect: addonIds,
+        },
+      },
     });
 
     return res.json(updatedSlot);
@@ -219,6 +260,9 @@ router.patch('/:id', async (req: Request, res: Response) => {
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
+    await prisma.slotAddon.deleteMany({
+      where: { slotId: id },
+    });
     await prisma.slot.delete({
       where: { id },
     });
@@ -239,6 +283,7 @@ router.post('/:id/bookingconfirm', async (req: Request, res: Response) => {
       service,
       instagramHandle,
       price,
+      addons,
     } = req.body;
 
     if (!id) return res.status(400).json({ error: 'invalid id' });
@@ -250,7 +295,7 @@ router.post('/:id/bookingconfirm', async (req: Request, res: Response) => {
     const slot = await prisma.slot.findUnique({
       where: { id },
     });
-    if (!slot) return res.status(404).json({ error: 'no slot found' });
+    if (!slot) return res.status(404).json({ error: 'email no slot found' });
 
     if (slot.confirmEmail) return res.status(400).json({ error: 'email already sent' });
 
@@ -281,6 +326,7 @@ router.post('/:id/bookingconfirm', async (req: Request, res: Response) => {
           booking_date: dayjs(slot.bookingDate).format('LLL'),
           service,
           price: currency(price).format(),
+          addons,
         },
       };
       await sgMail.send(emailBody);
@@ -303,6 +349,7 @@ router.post('/:id/bookingpaid', async (req: Request, res: Response) => {
       service,
       instagramHandle,
       price,
+      addons,
     } = req.body;
 
     if (!id) return res.status(400).json({ error: 'invalid id' });
@@ -330,6 +377,8 @@ router.post('/:id/bookingpaid', async (req: Request, res: Response) => {
       },
     });
 
+    const newAddOn = addons.filter((addon: any) => addon.addon !== 'none');
+
     if (slot.bookingDate) {
       const emailBody = {
         to: email,
@@ -343,6 +392,7 @@ router.post('/:id/bookingpaid', async (req: Request, res: Response) => {
           booking_date: dayjs(slot.bookingDate).format('LLL'),
           service,
           price: currency(price).format(),
+          newAddOn,
         },
       };
       await sgMail.send(emailBody);
