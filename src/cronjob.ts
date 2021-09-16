@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /* eslint-disable linebreak-style */
 import { PrismaClient, Prisma } from '@prisma/client';
 import sgMail from '@sendgrid/mail';
