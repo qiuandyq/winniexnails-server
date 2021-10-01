@@ -234,13 +234,14 @@ router.patch('/:id', async (req: Request, res: Response) => {
           data: {
             slotId: id,
             addon: addon.addon,
-            price: addon.price,
+            price: addon.price ? addon.price : '0',
           },
         });
 
         addonIds.push({ id: createAddon.id });
       });
     }
+
     const updatedSlot = await prisma.slot.update({
       where: { id },
       data: {
@@ -474,6 +475,59 @@ router.post('/bookingconfirm', async (req: Request, res: Response) => {
       });
     });
     return res.status(500).json('sent email confirmations');
+  } catch (e) {
+    return res.status(500).json({ error: e });
+  }
+});
+
+router.post('/:id/bookingtoclient', async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    const {
+      name,
+      email,
+      phoneNumber,
+      service,
+      instagramHandle,
+      price,
+      addons,
+    } = req.body;
+
+    if (!id) return res.status(400).json({ error: 'invalid id' });
+
+    if ([name, email, phoneNumber, service, instagramHandle, price].some((x) => !x)) {
+      return res.status(400).json({ error: 'invalid body' });
+    }
+
+    const slot = await prisma.slot.findUnique({
+      where: { id },
+    });
+    if (!slot) return res.status(404).json({ error: 'email no slot found' });
+
+    if (slot.bookingDate) {
+      const emailBody = {
+        to: process.env.CLIENT_EMAIL,
+        from: {
+          email: 'hello@winniexnails.com',
+          name: 'winniexnails',
+        },
+        templateId: 'd-2e3d2b1e30424e41b8b4fd2ee3bcd306',
+        dynamic_template_data: {
+          id: slot.id,
+          name,
+          booking_date: dayjs(slot.bookingDate).format('LLL'),
+          service,
+          email,
+          instagram: instagramHandle,
+          price: currency(price).format(),
+          addons,
+        },
+      };
+      await sgMail.send(emailBody);
+
+      return res.json();
+    }
+    return res.status(500).json({ error: 'server error' });
   } catch (e) {
     return res.status(500).json({ error: e });
   }
