@@ -506,12 +506,65 @@ router.post('/:id/bookingtoclient', async (req: Request, res: Response) => {
 
     if (slot.bookingDate) {
       const emailBody = {
-        to: process.env.CLIENT_EMAIL,
+        to: email,
         from: {
           email: 'hello@winniexnails.com',
           name: 'winniexnails',
         },
         templateId: 'd-2e3d2b1e30424e41b8b4fd2ee3bcd306',
+        dynamic_template_data: {
+          id: slot.id,
+          name,
+          booking_date: dayjs(slot.bookingDate).format('LLL'),
+          service,
+          email,
+          instagram: instagramHandle,
+          price: currency(price).format(),
+          addons,
+        },
+      };
+      await sgMail.send(emailBody);
+
+      return res.json();
+    }
+    return res.status(500).json({ error: 'server error' });
+  } catch (e) {
+    return res.status(500).json({ error: e });
+  }
+});
+
+router.post('/:id/bookingcancel', async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    const {
+      name,
+      email,
+      service,
+      instagramHandle,
+      price,
+      addons,
+      booked,
+    } = req.body;
+
+    if (!id) return res.status(400).json({ error: 'invalid id' });
+
+    if (booked === 'open') {
+      return res.json();
+    }
+
+    const slot = await prisma.slot.findUnique({
+      where: { id },
+    });
+    if (!slot) return res.status(404).json({ error: 'email no slot found' });
+
+    if (slot.bookingDate) {
+      const emailBody = {
+        to: process.env.CLIENT_EMAIL,
+        from: {
+          email: 'hello@winniexnails.com',
+          name: 'winniexnails',
+        },
+        templateId: 'd-1393570b041c4dd7b81e667300f3eb2b',
         dynamic_template_data: {
           id: slot.id,
           name,
