@@ -506,7 +506,7 @@ router.post('/:id/bookingtoclient', async (req: Request, res: Response) => {
 
     if (slot.bookingDate) {
       const emailBody = {
-        to: email,
+        to: process.env.CLIENT_EMAIL,
         from: {
           email: 'hello@winniexnails.com',
           name: 'winniexnails',
