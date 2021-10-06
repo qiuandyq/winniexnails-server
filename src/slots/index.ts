@@ -559,7 +559,7 @@ router.post('/:id/bookingcancel', async (req: Request, res: Response) => {
 
     if (slot.bookingDate) {
       const emailBody = {
-        to: process.env.CLIENT_EMAIL,
+        to: email,
         from: {
           email: 'hello@winniexnails.com',
           name: 'winniexnails',
