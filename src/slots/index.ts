@@ -433,7 +433,6 @@ router.post('/bookingconfirm', async (req: Request, res: Response) => {
           lt: end.toISOString(),
         },
         booked: true,
-        paid: true,
         updateEmail: false,
       },
       include: {
