@@ -189,7 +189,23 @@ router.patch('/:id', async (req: Request, res: Response) => {
       instagramHandle,
       price,
       addons,
+      date,
     } = req.body;
+
+    if (date) {
+      try {
+        const updatedSlot = await prisma.slot.update({
+          where: { id },
+          data: {
+            bookingDate: dayjs(date).toDate(),
+          },
+        });
+
+        return res.json(updatedSlot);
+      } catch (e) {
+        return res.status(500).json({ error: e });
+      }
+    }
 
     if (paid) {
       try {
@@ -517,6 +533,7 @@ router.post('/:id/bookingtoclient', async (req: Request, res: Response) => {
           booking_date: dayjs(slot.bookingDate).format('LLL'),
           service,
           email,
+          phoneNumber,
           instagram: instagramHandle,
           price: currency(price).format(),
           addons,
