@@ -527,6 +527,24 @@ router.post('/:id/bookingtoclient', async (req: Request, res: Response) => {
       addons.forEach((addon: any) => { if (addOnString === '') addOnString += `${addon.addon} `; else addOnString += `, ${addon.addon}`; });
       let addOnPrice = '';
       addons.forEach((addon: any) => { if (addon.price) addOnPrice += `+ $${addon.price} `; });
+      let dateString = '';
+      if (date.getHours() === 12) {
+        const num = date.getHours();
+        dateString = `${num.toString()}:`;
+        dateString += date.getMinutes();
+        dateString += 'PM';
+      } else if (date.getHours() > 12) {
+        const num = date.getHours() - 12;
+        dateString = `${num.toString()}:`;
+        dateString += date.getMinutes();
+        dateString += 'PM';
+      } else {
+        const num = date.getHours();
+        dateString = `${num.toString()}:`;
+        dateString += date.getMinutes();
+        dateString += 'AM';
+      }
+
       const event = {
         start: [
           date.getFullYear(),
@@ -536,13 +554,12 @@ router.post('/:id/bookingtoclient', async (req: Request, res: Response) => {
           date.getMinutes(),
         ],
         duration: { hours: 2, minutes: 0 },
-        title: `${name} - ${service}`,
+        title: `${dateString} ${name} - ${service}`,
         description: `${service}: ${addOnString} 
         \nPrice: $${price} ${addOnPrice} 
         \nPhone Number: ${phoneNumber} 
         \nIG: ${instagramHandle} 
         \nEmail: ${email}`,
-        organizer: { name: 'Admin', email: 'hello@winniexnails.com' },
       };
 
       const { value } = ics.createEvent(event);
