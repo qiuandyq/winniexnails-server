@@ -21,6 +21,7 @@
     "dayjs": "^1.10.5",
     "debug": "^4.3.1",
     "express": "^4.17.1",
+    "ics": "^2.35.0",
     "prisma": "^2.23.0"
   },
   "devDependencies": {

@@ -7,6 +7,8 @@ import sgMail from '@sendgrid/mail';
 import currency from 'currency.js';
 
 // App setup
+const ics = require('ics');
+
 const router = Router();
 const prisma = new PrismaClient();
 
@@ -520,6 +522,31 @@ router.post('/:id/bookingtoclient', async (req: Request, res: Response) => {
     if (!slot) return res.status(404).json({ error: 'email no slot found' });
 
     if (slot.bookingDate) {
+      const date = new Date(slot.bookingDate);
+      let addOnString = '';
+      addons.forEach((addon: any) => { if (addOnString === '') addOnString += `${addon.addon} `; else addOnString += `, ${addon.addon}`; });
+      let addOnPrice = '';
+      addons.forEach((addon: any) => { if (addon.price) addOnPrice += `+ $${addon.price} `; });
+      const event = {
+        start: [
+          date.getFullYear(),
+          date.getMonth() + 1,
+          date.getDate(),
+          date.getHours(),
+          date.getMinutes(),
+        ],
+        duration: { hours: 2, minutes: 0 },
+        title: `${name} - ${service}`,
+        description: `${service}: ${addOnString} 
+        \nPrice: $${price} ${addOnPrice} 
+        \nPhone Number: ${phoneNumber} 
+        \nIG: ${instagramHandle} 
+        \nEmail: ${email}`,
+        organizer: { name: 'Admin', email: 'hello@winniexnails.com' },
+      };
+
+      const { value } = ics.createEvent(event);
+
       const emailBody = {
         to: process.env.CLIENT_EMAIL,
         from: {
@@ -538,6 +565,15 @@ router.post('/:id/bookingtoclient', async (req: Request, res: Response) => {
           price: currency(price).format(),
           addons,
         },
+        attachments: [
+          {
+            content: Buffer.from(value).toString('base64'),
+            filename: 'invite.ics',
+            name: 'invite.ics',
+            type: 'application/ics',
+            disposition: 'attachment',
+          },
+        ],
       };
       await sgMail.send(emailBody);
 

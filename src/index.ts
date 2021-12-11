@@ -1,9 +1,11 @@
 import express from 'express';
 import cors from 'cors';
-import bodyParser from 'body-parser';
+// import bodyParser from 'body-parser';
 
 import slots from './slots';
 import openSlots from './openSlots';
+
+const bodyParser = require('body-parser');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
