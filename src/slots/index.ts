@@ -16,6 +16,16 @@ sgMail.setApiKey(String(process.env.SENDGRID_API_KEY));
 
 const { CronJob } = require('cron');
 
+const findClient = async (email:any) => {
+  const client = await prisma.client.findUnique({
+    where: {
+      email,
+    },
+  });
+
+  return client;
+};
+
 const job = new CronJob('0 */6 * * *', (async () => {
   const begin = new Date(new Date().getTime());
   const end = new Date(new Date().getTime());
@@ -260,6 +270,31 @@ router.patch('/:id', async (req: Request, res: Response) => {
       });
     }
 
+    const client = await findClient(email);
+
+    if (client) {
+      await prisma.client.update({
+        where: { id: client.id },
+        data: {
+          slots: {
+            connect: { id },
+          },
+        },
+      });
+    } else {
+      await prisma.client.create({
+        data: {
+          name,
+          email,
+          phoneNumber,
+          instagramHandle,
+          slots: {
+            connect: { id },
+          },
+        },
+      });
+    }
+
     const updatedSlot = await prisma.slot.update({
       where: { id },
       data: {
@@ -288,7 +323,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     return res.json({});
   } catch (e) {
     // Catch failed deletes as outcome is the same
-    return res.json({});
+    return res.status(500).json({ error: e });
   }
 });
 

@@ -8,6 +8,15 @@ datasource db {
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
+model Client {
+  id                Int     @id     @default(autoincrement())
+  name              String
+  email             String  @unique
+  phoneNumber       String  @unique
+  instagramHandle   String
+  slots             Slot[]
+}
+
 model Slot {
   id              Int      @id @default(autoincrement())
   createdAt       DateTime @default(now())
@@ -25,6 +34,8 @@ model Slot {
   instagramHandle String?
   price           Decimal?
   addons          SlotAddon[]
+  client          Client? @relation(fields: [clientId], references: [id])
+  clientId        Int?
 }
 
 model SlotAddon {
@@ -34,3 +45,5 @@ model SlotAddon {
   slot            Slot @relation(fields: [slotId], references: [id])
   slotId          Int
 }
+
+
