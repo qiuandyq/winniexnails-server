@@ -142,7 +142,7 @@ router.get('/v2/:month/:year', async (req: Request, res: Response) => {
   try {
     const findQuery: Prisma.SlotFindManyArgs = {
       where: {
-        createdAt: {
+        bookingDate: {
           gte: firstDay,
           lt: lastDay,
         },
