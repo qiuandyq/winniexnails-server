@@ -135,6 +135,41 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/v2/:month/:year', async (req: Request, res: Response) => {
+  const date = new Date(Number(req.params.year), Number(req.params.month), 1);
+  const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  try {
+    const findQuery: Prisma.SlotFindManyArgs = {
+      where: {
+        createdAt: {
+          gte: firstDay,
+          lt: lastDay,
+        },
+      },
+      include: {
+        addons: true,
+      },
+    };
+
+    if (req.query.from) {
+      const fromDate: dayjs.Dayjs = dayjs(req.query.from as string);
+      if (!fromDate.isValid()) {
+        return res.status(400).json({ error: 'from query is invalid date format' });
+      }
+      findQuery.where = {
+        bookingDate: {
+          gte: fromDate.toISOString(),
+        },
+      };
+    }
+
+    return res.json(await prisma.slot.findMany(findQuery));
+  } catch (e) {
+    return res.status(500).json({ error: e });
+  }
+});
+
 const createSingleSlot = async (date: string): Promise<number> => {
   const slot = await prisma.slot.create({
     data: { bookingDate: dayjs(date).toDate() },
