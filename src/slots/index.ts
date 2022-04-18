@@ -99,8 +99,6 @@ const job = new CronJob('0 */6 * * *', (async () => {
   //     },
   //   };
   //   await sgMail.send(emailBody);
-
-  // console.log(await prisma.slot.findMany(findQuery));
 }), null, true, 'America/Los_Angeles');
 job.start();
 
