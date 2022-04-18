@@ -138,7 +138,8 @@ router.get('/', async (req: Request, res: Response) => {
 router.get('/v2/:month/:year', async (req: Request, res: Response) => {
   const date = new Date(Number(req.params.year), Number(req.params.month), 1);
   const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
-  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+
   try {
     const findQuery: Prisma.SlotFindManyArgs = {
       where: {
