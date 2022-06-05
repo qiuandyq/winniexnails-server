@@ -360,9 +360,9 @@ router.delete('/:id', async (req: Request, res: Response) => {
       where: { id },
     });
     return res.json({});
-  } catch (e) {
+  } catch (err) {
     // Catch failed deletes as outcome is the same
-    return res.status(500).json({ error: e });
+    return res.status(500).json({ error: err });
   }
 });
 
