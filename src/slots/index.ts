@@ -246,7 +246,6 @@ router.patch('/:id', async (req: Request, res: Response) => {
             bookingDate: dayjs(date).toDate(),
           },
         });
-
         return res.json(updatedSlot);
       } catch (e) {
         return res.status(500).json({ error: e });
@@ -332,6 +331,12 @@ router.patch('/:id', async (req: Request, res: Response) => {
     const updatedSlot = await prisma.slot.update({
       where: { id },
       data: {
+        name,
+        email,
+        phoneNumber,
+        instagramHandle,
+        service,
+        price,
         booked: true,
         addons: {
           connect: addonIds,
