@@ -691,7 +691,7 @@ router.post('/:id/bookingcancel', async (req: Request, res: Response) => {
 
     if (!id) return res.status(400).json({ error: 'invalid id' });
 
-    if (booked === 'open') {
+    if (booked === 'open' || !email) {
       return res.json();
     }
 
